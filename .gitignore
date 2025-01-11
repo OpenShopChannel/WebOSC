@@ -28,7 +28,7 @@ hs_err_pid*
 
 application.yml
 application-staging.yml
-application-dev.yml
+application-dev*.yml
 contents/
 /data/
 target/

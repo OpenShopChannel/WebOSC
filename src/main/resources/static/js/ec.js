@@ -99,12 +99,13 @@ function initializeEC() {
  * @param {function} callback
  */
 function doRegistrationDosido(callback) {
-	trace(info.registrationStatus)
+	trace("Registration status: " + info.registrationStatus);
 	completeOp(ec.checkRegistration(), function() {
 		// We need to call ec.getDeviceInfo() once more to ensure
 		// we have the latest registration status.
 		var status = ec.getDeviceInfo().registrationStatus;
 		if (status === ECRegistrationStates.UNREGISTERED) {
+			trace("Console is unregistered, registering now...");
 			// We need to register this console.
 			// This challenge - "NintyWhyPls" - is hardcoded
 			// within WiiSOAP, as requesting a challenge from the server
@@ -114,6 +115,7 @@ function doRegistrationDosido(callback) {
 				callback();
 			});
 		} else if (status === ECRegistrationStates.REGISTERED) {
+			trace("Console is already registered, syncing registration...");
 			// syncRegistration ensures that the client has the latest token from the server.
 			// We could potentially allow token updating at a point, but do not currently.
 			// TODO(spotlightishere): Determine the best approach
@@ -122,6 +124,7 @@ function doRegistrationDosido(callback) {
 				callback();
 			});
 		} else {
+			trace("Unknown registration state: " + status + ". Cannot continue.");
 			error(ErrorCodes.EC_FAILED_REGISTRATION, "Unknown EC registration state passed.");
 		}
 	});

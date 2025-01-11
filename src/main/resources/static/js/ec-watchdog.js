@@ -5,7 +5,7 @@
  * @param {function} callback
  */
 function completeOp(progress, callback) {
-	trace("hi! status: " + progress.status + ", operation: " + progress.operation + ", description: " + progress.description + ", phase: " + progress.phase + ", isCancelRequested: " + progress.isCancelRequested + ", downloadedSize: " + progress.downloadedSize + ", totalSize: " + progress.totalSize + ", errCode: " + progress.errCode + ", errInfo: " + progress.errInfo);
+	trace("hi! " + logProgress(progress));
 
 	const watchdog = new ECWatchdog(3000);
 	watchdog.complete(callback);
@@ -66,10 +66,12 @@ function ECWatchdog(timeout) {
 		const status = progress.status;
 		if (status < 0 && status !== ECReturnCodes.ONGOING) {
 			// Uh oh...
+			trace("Operation failed - " + logProgress(progress));
 			error(ErrorCodes.EC_ERROR, "requested operation to complete came in with status " + status);
 			return;
 		} else if (status === 0) {
 			// We're free!
+			trace("Operation completed - running callback.");
 			callback();
 			return;
 		}
@@ -82,10 +84,12 @@ function ECWatchdog(timeout) {
 			// ...one, that we are a download operation with a total size,
 			// and our attributed downloaded size is different from before.
 			didProgress = (progress.downloadedSize !== cachedDownloadSize);
+			trace("Did progress: " + didProgress + ", Downloaded size: " + progress.downloadedSize + ", Cached downloaded size: " + cachedDownloadSize);
 		} else {
 			// ...two, that we are waiting for the proper response of an action
 			// and our phase has changed.
 			didProgress = (progress.phase !== cachedPhase);
+			trace("Did progress: " + didProgress + ", New Phase: " + progress.phase + ", Old Phase: " + cachedPhase);
 		}
 
 		// If we've progressed, we need to update our cache and reset our failure timer.
@@ -93,9 +97,11 @@ function ECWatchdog(timeout) {
 			cachedDownloadSize = progress.downloadedSize;
 			cachedPhase = progress.phase;
 			elapsedLackOfProgress = 0;
+			trace("Resetting lack of progress timer.");
 		} else {
 			// If we didn't, we need to add this poll to our failure timer.
 			elapsedLackOfProgress += this.pollInterval;
+			trace("Adding " + this.pollInterval + "ms to lack of progress timer.");
 		}
 
 		// Check if we've gone over our allocated time.
@@ -110,4 +116,11 @@ function ECWatchdog(timeout) {
 			currentObject.complete(callback);
 		}, this.pollInterval);
 	};
+}
+
+function logProgress(progress) {
+	return "progress: status: " + progress.status + ", operation: " + progress.operation +
+		", description: " + progress.description + ", phase: " + progress.phase +
+		", isCancelRequested: " + progress.isCancelRequested + ", downloadedSize: " + progress.downloadedSize +
+		", totalSize: " + progress.totalSize + ", errCode: " + progress.errCode + ", errInfo: " + progress.errInfo;
 }
