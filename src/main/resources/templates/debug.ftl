@@ -36,7 +36,7 @@
 <@layout.page>
 	<a href="javascript:history.back()">Go back</a>
 
-	<p>Current language: {{ request.cookies.get('language') }}</p>
+	<p>Current language: ${lang}</p>
 	<p id="forceLanguageLabel">Force language:</p>
 	<select name="languages" id="languagesPicker">
 		<option value="en">English</option>

@@ -7,6 +7,7 @@ import org.oscwii.shop.utils.Paginator;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -33,10 +34,11 @@ public class PageController extends BaseController implements ErrorController
     }*/
 
     @GetMapping("/debug")
-    public String debug()
+    public String debug(@CookieValue String language, Model model)
     {
         if(!isDevelopment())
             return "redirect:/";
+        model.addAttribute("lang", language);
         return "debug";
     }
 

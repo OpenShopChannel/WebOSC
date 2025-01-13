@@ -46,16 +46,18 @@ function installChannel(callback) {
 }
 
 function notifyDownload(title, token) {
-	$.post("/stat/download/" + title + "?token=" + token)
-		.done(function() {
+	$.ajax({
+		type: "POST",
+		url: "/stat/download/" + title + "?token=" + token,
+		success: function () {
+			trace("Successfully notified download to API for title: " + title);
+		},
+		error: function (req) {
+			trace("Failed to notify download to API for title: \"" + title + "\" with status: " + req.status);
 			if(isDevelopment) {
-				trace("Successfully notified download to API for title: " + title);
+				error(ErrorCodes.API_DOWNLOAD_NOTIFICATION_FAILED, "Failed to notify download to API for title: \"" +
+					title + "\" (" + req.status + ")");
 			}
-		})
-		.fail(function () {
-			trace("Failed to notify download to API for title: " + title);
-			if(isDevelopment) {
-				error(ErrorCodes.API_DOWNLOAD_NOTIFICATION_FAILED, "Failed to notify download to API for title: " + title);
-			}
-		});
+		}
+	});
 }
